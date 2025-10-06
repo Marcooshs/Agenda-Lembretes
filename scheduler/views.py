@@ -9,6 +9,17 @@ from .permissions import IsOwner
 from .filters import EventFilter
 
 
+def _ics_escape(value: str) -> str:
+    if value is None:
+        return ''
+    return (
+        value.replace('\\', '\\\\')
+             .replace('\n', '\\n')
+             .replace(',', '\\,')
+             .replace(';', '\\;')
+    )
+
+
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
@@ -29,8 +40,12 @@ class EventViewSet(viewsets.ModelViewSet):
         event = self.get_object()
         start = timezone.localtime(event.start).strftime('%Y%m%dT%H%M%S')
         end = timezone.localtime(event.end).strftime('%Y%m%dT%H%M%S')
-        description = (event.description or '').replace('\n', ' ')
-        location = event.location or ''
+        dtstamp = timezone.now().strftime('%Y%m%dT%H%M%S')
+
+        summary = _ics_escape(event.title or '')
+        description = _ics_escape(event.description or '')
+        location = _ics_escape(event.location or '')
+
         ics = ''.join([
             'BEGIN:VCALENDAR\r\n',
             'VERSION:2.0\r\n',
@@ -39,10 +54,10 @@ class EventViewSet(viewsets.ModelViewSet):
             'METHOD:PUBLISH\r\n',
             'BEGIN:VEVENT\r\n',
             f'UID:event-{event.id}@agenda\r\n',
-            f'DTSTAMP:{timezone.now().strftime("%Y%m%dT%H%M%S")}\r\n',
+            f'DTSTAMP:{dtstamp}\r\n',
             f'DTSTART:{start}\r\n',
             f'DTEND:{end}\r\n',
-            f'SUMMARY:{event.title}\r\n',
+            f'SUMMARY:{summary}\r\n',
             f'DESCRIPTION:{description}\r\n',
             f'LOCATION:{location}\r\n',
             'END:VEVENT\r\n',

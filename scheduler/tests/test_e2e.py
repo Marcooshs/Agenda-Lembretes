@@ -1,7 +1,6 @@
 from datetime import timedelta
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.utils import timezone
 from django.core import mail
 
@@ -13,21 +12,21 @@ from scheduler.tasks import check_due_reminders
 
 
 @override_settings(
-    EMAIL_BACKEND= 'django.core.mail.backends.locmem.EmailBackend',
-    CELERY_TASK_ALWAYS_EAGER= True,
-    DEFAULT_FROM_EMAIL= 'Agenda <no-reply@agenda.local>',
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    CELERY_TASK_ALWAYS_EAGER=True,
+    DEFAULT_FROM_EMAIL='Agenda <no-reply@agenda.local>',
 )
 class AgendaE2ETest(TestCase):
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user(
-            username= 'alice',
-            email= 'alice@example.com',
-            password= 'Passw0rd!234',
+            username='alice',
+            email='alice@example.com',
+            password='Passw0rd!234',
         )
         self.token = Token.objects.create(user=self.user)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION= f'Token {self.token.key}')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
     def test_health(self):
         resp = self.client.get('/health/')
@@ -35,8 +34,8 @@ class AgendaE2ETest(TestCase):
         self.assertEqual(resp.json().get('status'), 'ok')
 
     def test_create_event_creates_default_reminder_and_filter_date_and_export_ics(self):
-        start = timezone.now() + timedelta(hours= 2)
-        end = start + timedelta(hours= 1)
+        start = timezone.now() + timedelta(hours=2)
+        end = start + timedelta(hours=1)
         payload = {
             'title': 'Reunião de Sprint',
             'description': 'Alinhar entregas',
@@ -49,7 +48,7 @@ class AgendaE2ETest(TestCase):
         resp = self.client.post('/api/events/', payload, format='json')
         self.assertEqual(resp.status_code, 201, resp.content)
         event_id = resp.data['id']
-        event = Event.objects.get(id=event_id, owner= self.user)
+        event = Event.objects.get(id=event_id, owner=self.user)
 
         # lembrete padrão 15 minutos
         reminders = event.reminders.all()
@@ -70,23 +69,26 @@ class AgendaE2ETest(TestCase):
 
     def test_due_reminder_sends_email_and_logs(self):
         # criar evento que começa em 1 minuto
-        start = timezone.now() + timedelta(minutes= 1)
-        end = start + timedelta(minutes= 30)
+        start = timezone.now() + timedelta(minutes=1)
+        end = start + timedelta(minutes=30)
         event = Event.objects.create(
-            owner= self.user,
-            title= 'Chamada rápida',
-            description= 'Status call',
-            location= 'Teams',
-            start= start,
-            end= end,
-            is_all_day= False,
+            owner=self.user,
+            title='Chamada rápida',
+            description='Status call',
+            location='Teams',
+            start=start,
+            end=end,
+            is_all_day=False,
         )
         # lembrete que já está vencido (2 min antes de um evento que começa em 1 min)
-        reminder = Reminder.objects.create(event= event, minutes_before= 2)
+        reminder = Reminder.objects.create(event=event, minutes_before=2)
 
         # roda a task de verificação
         result = check_due_reminders()
         self.assertIsInstance(result, dict)
+        self.assertIn('sent', result)
+        self.assertEqual(result['sent'], 1)  # valida contador de envios ✅
+
         reminder.refresh_from_db()
 
         # deve ter sido enviado
@@ -108,16 +110,16 @@ class AgendaE2ETest(TestCase):
         User = get_user_model()
         bob = User.objects.create_user('bob', 'bob@example.com', 'Passw0rd!234')
         other_event = Event.objects.create(
-            owner= bob,
-            title= 'Evento do Bob',
-            description= 'Privado',
-            location= 'Sala A',
-            start= timezone.now() + timedelta(hours= 1),
-            end= timezone.now() + timedelta(hours= 2),
-            is_all_day= False,
+            owner=bob,
+            title='Evento do Bob',
+            description='Privado',
+            location='Sala A',
+            start=timezone.now() + timedelta(hours=1),
+            end=timezone.now() + timedelta(hours=2),
+            is_all_day=False,
         )
 
         # tentar criar lembrete no evento do Bob pela API
         payload = {'event': other_event.id, 'minutes_before': 10, 'channel': 'email'}
-        resp = self.client.post('/api/reminders/', payload, format= 'json')
+        resp = self.client.post('/api/reminders/', payload, format='json')
         self.assertEqual(resp.status_code, 403)
