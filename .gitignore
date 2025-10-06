@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# Venv
+.venv/
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Env & secrets
+.env
+*.env
+.env.*.local
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# pytest / mypy / cache
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
