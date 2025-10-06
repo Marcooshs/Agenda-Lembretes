@@ -27,22 +27,26 @@ class EventViewSet(viewsets.ModelViewSet):
         event = self.get_object()
         start = timezone.localtime(event.start).strftime("%Y%m%dT%H%M%S")
         end = timezone.localtime(event.end).strftime("%Y%m%dT%H%M%S")
-        ics = (
-            'BEGIN:VCALENDAR\r\n'
-            'VERSION:2.0\r\n'
-            'PRODID:-//Agenda//PT-BR//EN\r\n'
-            'CALSCALE:GREGORIAN\r\n'
-            'METHOD:PUBLISH\r\n'
-            'BEGIN:VEVENT\r\n'
-            f'UID:event-{event.id}@agenda\r\n'
-            f'DTSTAMP:{timezone.now().strftime('%Y%m%dT%H%M%S')}\r\n'
-            f'DTSTART:{start}\r\n'
-            f'DTEND:{end}\r\n'
-            f'SUMMARY:{event.title}\r\n'
-            f'DESCRIPTION:{(event.description or '').replace('\\n',' ')}\r\n'
-            f'LOCATION:{event.location or ''}\r\n'
-            'END:VEVENT\r\n'
-            'END:VCALENDAR\r\n'
+        description = (event.description or "").replace("\n", " ")
+        location = event.location or ""
+        ics = "".join(
+            [
+                "BEGIN:VCALENDAR\r\n",
+                "VERSION:2.0\r\n",
+                "PRODID:-//Agenda//PT-BR//EN\r\n",
+                "CALSCALE:GREGORIAN\r\n",
+                "METHOD:PUBLISH\r\n",
+                "BEGIN:VEVENT\r\n",
+                f"UID:event-{event.id}@agenda\r\n",
+                f"DTSTAMP:{timezone.now().strftime('%Y%m%dT%H%M%S')}\r\n",
+                f"DTSTART:{start}\r\n",
+                f"DTEND:{end}\r\n",
+                f"SUMMARY:{event.title}\r\n",
+                f"DESCRIPTION:{description}\r\n",
+                f"LOCATION:{location}\r\n",
+                "END:VEVENT\r\n",
+                "END:VCALENDAR\r\n",
+            ]
         )
         resp = HttpResponse(ics, content_type='text/calendar; charset=utf-8')
         resp["Content-Disposition"] = f'attachment; filename="event-{event.id}.ics"'
@@ -51,7 +55,7 @@ class EventViewSet(viewsets.ModelViewSet):
 class ReminderViewSet(viewsets.ModelViewSet):
     serializer_class = ReminderSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
-    ordering_fields = ['scheduled_for", "minutes_before']
+    ordering_fields = ["scheduled_for", "minutes_before"]
 
     def get_queryset(self):
         # Lembretes apenas de eventos do usuário
