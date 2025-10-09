@@ -1,31 +1,189 @@
+{% load static %}
 <!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>{% block title %}Agenda & Lembretes{% endblock %}</title>
-  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css">
-  <style>
-    body{font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto; padding:2rem; line-height:1.5;}
-    .container{max-width:900px;margin:0 auto;}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-    .tag{background:#eef;color:#334;padding:.25rem .5rem;border-radius:.4rem;font-size:.8rem}
-    a{color:#0a58ca;text-decoration:none}
-    a:hover{text-decoration:underline}
-    code{background:#f6f7f9;padding:.2rem .4rem;border-radius:.3rem}
-    ul{margin-left:1rem}
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>Agenda & Lembretes</h1>
-      <span class="tag">API-first</span>
-    </header>
-    <main>{% block content %}{% endblock %}</main>
-    <footer style="margin-top:2rem;color:#666;font-size:.9rem">
-      <p>Feito com Django + DRF + Celery 💚</p>
+<html lang="pt-br" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Agenda{% endblock %}</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+      :root {
+        --brand-grad: linear-gradient(135deg, #7c3aed 0%, #00c2ff 100%);
+        --brand-soft:  rgba(124, 58, 237, .08);
+        --card-radius: 14px;
+      }
+      .navbar-blur {
+        backdrop-filter: saturate(180%) blur(8px);
+        background-color: rgba(255,255,255,.65);
+        border-bottom: 1px solid rgba(0,0,0,.06);
+      }
+      [data-bs-theme="dark"] .navbar-blur {
+        background-color: rgba(16,16,20,.6);
+        border-bottom-color: rgba(255,255,255,.08);
+      }
+      .navbar .navbar-toggler-icon { background-image: var(--bs-navbar-toggler-icon-bg); }
+      .hero {
+        background: var(--brand-grad); color: #fff;
+        border-bottom-left-radius: 32px; border-bottom-right-radius: 32px;
+      }
+      .card-rounded { border-radius: var(--card-radius); }
+      .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+      .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .6rem; border-radius:999px; background:var(--brand-soft); }
+      .table-sticky thead th { position: sticky; top: 0; z-index: 1; background: var(--bs-body-bg); }
+      .btn-gradient { background: var(--brand-grad); color:#fff; border:0; }
+      .btn-gradient:hover { opacity:.95; color:#fff; }
+
+      /* HTMX transitions */
+      .htmx-added { animation: fadeIn .25s ease-in; }
+      .htmx-swapping { opacity: 0; transition: opacity .2s ease-out; }
+      @keyframes fadeIn { from {opacity:0; transform: translateY(-4px);} to {opacity:1; transform:none;} }
+
+      /* Global loading overlay for HTMX */
+      .hx-overlay { position: fixed; inset: 0; display:none; align-items:center; justify-content:center;
+        background: rgba(0,0,0,.15); z-index: 1080; }
+      .hx-overlay.show { display:flex; }
+    </style>
+
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body>
+    <!-- Topbar -->
+    <nav class="navbar navbar-expand-lg navbar-blur">
+      <div class="container">
+        <a class="navbar-brand fw-semibold" href="/">
+          <i class="bi bi-calendar2-week me-1"></i> Agenda
+        </a>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#topbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="topbar" class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/web/events/"><i class="bi bi-layout-text-window-reverse me-1"></i>Web</a></li>
+            <li class="nav-item"><a class="nav-link" href="/ui/events/"><i class="bi bi-lightning-charge me-1"></i>HTMX</a></li>
+            <li class="nav-item"><a class="nav-link" href="/api/"><i class="bi bi-braces-asterisk me-1"></i>API</a></li>
+            <li class="nav-item"><a class="nav-link" href="/health/"><i class="bi bi-heart-pulse me-1"></i>Health</a></li>
+          </ul>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-secondary" id="themeToggle" title="Alternar tema">
+              <i class="bi bi-moon-stars"></i>
+            </button>
+            {% if request.user.is_authenticated %}
+              <span class="navbar-text small">Olá, <strong>{{ request.user.username }}</strong></span>
+              <a class="btn btn-sm btn-primary" href="/admin/logout/">Sair</a>
+            {% else %}
+              <a class="btn btn-sm btn-gradient" href="/admin/login/?next={{ request.path }}">Entrar</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    {% block hero %}{% endblock %}
+
+    <!-- Conteúdo -->
+    <main class="container my-4">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container my-4 py-3 border-top small d-flex justify-content-between">
+      <span class="text-secondary">Feito com Bootstrap 5 + HTMX</span>
+      <span class="text-secondary">&copy; {% now "Y" %}</span>
     </footer>
-  </div>
-</body>
+
+    <!-- Toasts (Django messages) -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastArea"></div>
+
+    <!-- HTMX Global Loading -->
+    <div class="hx-overlay" id="hxOverlay">
+      <div class="spinner-border" role="status" aria-label="Carregando"></div>
+    </div>
+
+    <!-- JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+
+    <script>
+      // Tema persistente (light → dark → auto)
+      (function() {
+        const key = 'theme';
+        const get = () => localStorage.getItem(key) || 'auto';
+        const apply = (t) => {
+          const mode = t === 'auto'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : t;
+          document.documentElement.setAttribute('data-bs-theme', mode);
+          const icon = document.querySelector('#themeToggle i');
+          if (icon) icon.className = mode === 'dark' ? 'bi bi-brightness-high' : 'bi bi-moon-stars';
+        };
+        apply(get());
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+          const current = get();
+          const next = current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
+          localStorage.setItem(key, next);
+          apply(next);
+        });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => apply(get()));
+      })();
+
+      // Tooltips & popovers
+      document.addEventListener('DOMContentLoaded', () => {
+        [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].forEach(el => new bootstrap.Tooltip(el));
+        [...document.querySelectorAll('[data-bs-toggle="popover"]')].forEach(el => new bootstrap.Popover(el));
+      });
+
+      // CSRF para HTMX
+      document.body.addEventListener('htmx:configRequest', function (evt) {
+        const name = 'csrftoken';
+        const value = document.cookie.split('; ').find(r => r.startsWith(name+'='))?.split('=')[1];
+        if (value) evt.detail.headers['X-CSRFToken'] = value;
+      });
+
+      // Overlay global de carregamento (HTMX)
+      document.body.addEventListener('htmx:beforeRequest', ()=> document.getElementById('hxOverlay').classList.add('show'));
+      document.body.addEventListener('htmx:afterRequest',  ()=> document.getElementById('hxOverlay').classList.remove('show'));
+    </script>
+
+    <!-- Mensagens do Django em JSON (sem json_script dentro de <script>) -->
+    <script id="dj_messages" type="application/json">
+    {% if messages %}
+    [
+      {% for m in messages %}
+        {"level":"{{ m.tags }}","text":"{{ m|escapejs }}"}{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+    {% else %}[] {% endif %}
+    </script>
+
+    <script>
+      // Renderiza toasts a partir de #dj_messages
+      (function(){
+        const raw = document.getElementById('dj_messages')?.textContent || '[]';
+        let items=[]; try{ items = JSON.parse(raw) }catch(e){}
+        const area = document.getElementById('toastArea');
+        items.forEach(({level,text})=>{
+          const el = document.createElement('div');
+          el.className = 'toast align-items-center mb-2';
+          el.role = 'alert'; el.ariaLive = 'assertive'; el.ariaAtomic = 'true';
+          el.innerHTML = `
+            <div class="d-flex">
+              <div class="toast-body">
+                <i class="bi ${level?.includes('success')?'bi-check-circle text-success':'bi-info-circle'} me-2"></i>${text}
+              </div>
+              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>`;
+          area.appendChild(el);
+          new bootstrap.Toast(el, {delay: 4000, autohide: true}).show();
+        });
+      })();
+    </script>
+
+    {% block body_extra %}{% endblock %}
+  </body>
 </html>
