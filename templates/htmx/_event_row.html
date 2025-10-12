@@ -1,0 +1,38 @@
+{% load tz %}
+<tr id="event-{{ e.id }}">
+  <td class="fw-semibold">
+    <i class="bi bi-calendar-event me-1 text-primary"></i>{{ e.title }}
+  </td>
+  <td>
+    <span class="badge text-bg-light me-1"><i class="bi bi-clock-history me-1"></i>{{ e.start|localtime|date:"d/m/Y H:i" }}</span>
+    <i class="bi bi-arrow-right-short"></i>
+    <span class="badge text-bg-light ms-1">{{ e.end|localtime|date:"d/m/Y H:i" }}</span>
+  </td>
+  <td>{{ e.location|default:"-" }}</td>
+  <td>
+    {% if e.is_all_day %}
+      <span class="badge text-bg-success"><i class="bi bi-sun me-1"></i>Sim</span>
+    {% else %}
+      <span class="badge text-bg-secondary">Não</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <div class="btn-group">
+      <a class="btn btn-outline-secondary btn-sm" href="{% url 'scheduler_web:event-detail' e.id %}" data-bs-toggle="tooltip" title="Detalhes">
+        <i class="bi bi-eye"></i>
+      </a>
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'event-export-ics' e.id %}" data-bs-toggle="tooltip" title="Baixar ICS">
+        <i class="bi bi-download"></i>
+      </a>
+      <button
+        class="btn btn-outline-danger btn-sm"
+        hx-delete="{% url 'ui:event-delete' e.id %}"
+        hx-target="closest tr"
+        hx-swap="delete"
+        hx-confirm="Excluir este evento?"
+        data-bs-toggle="tooltip" title="Excluir">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </td>
+</tr>

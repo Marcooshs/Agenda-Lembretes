@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load tz %}
+{% block title %}Eventos (HTMX){% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-lightning-charge me-2"></i>Eventos (HTMX)</h2>
+      <div class="text-secondary small">Crie e remova rapidamente com modais e transições.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/web/events/"><i class="bi bi-layout-text-window-reverse me-1"></i> Web UI</a>
+      <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#quickAddModal"><i class="bi bi-plus-lg me-1"></i> Novo</button>
+    </div>
+  </div>
+
+  <div class="card card-rounded shadow-soft mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input class="form-control" placeholder="Buscar por título ou local..." id="tableSearch">
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <span class="chip"><i class="bi bi-circle-half"></i> Dica: use o tema escuro</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-rounded shadow-soft">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0 table-hover table-sticky" id="eventsTable">
+        <thead class="table-light">
+          <tr>
+            <th style="min-width:220px;">Título</th>
+            <th style="min-width:260px;">Quando</th>
+            <th>Local</th>
+            <th>Dia todo</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="events-tbody">
+          {% for e in events %}
+            {% include "htmx/_event_row.html" with e=e %}
+          {% empty %}
+            <tr class="text-center text-secondary">
+              <td colspan="5">Sem eventos por enquanto.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Botão flutuante -->
+  <button class="btn btn-gradient rounded-circle position-fixed" style="right:24px; bottom:24px; width:56px; height:56px"
+          data-bs-toggle="modal" data-bs-target="#quickAddModal" aria-label="Novo evento">
+    <i class="bi bi-plus-lg"></i>
+  </button>
+
+  <!-- Modal Quick Add (HTMX) -->
+  <div class="modal fade" id="quickAddModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content card-rounded">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-calendar-plus me-2"></i>Novo evento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form
+            hx-post="{% url 'ui:event-create' %}"
+            hx-target="#events-tbody"
+            hx-swap="afterbegin"
+            hx-on::after-request="this.reset(); bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();"
+            class="row g-3"
+          >
+            {% csrf_token %}
+            <div class="col-12">
+              <label class="form-label">Título</label>
+              <input name="title" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea name="description" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Local</label>
+              <input name="location" class="form-control">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_all_day" id="hx_is_all_day">
+                <label class="form-check-label" for="hx_is_all_day">Dia inteiro</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Início</label>
+              <input type="datetime-local" name="start" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Fim</label>
+              <input type="datetime-local" name="end" class="form-control" required>
+            </div>
+            <div class="col-12 text-end">
+              <button class="btn btn-gradient" type="submit"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filtro instantâneo da tabela
+    document.getElementById('tableSearch').addEventListener('input', function(){
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#events-tbody tr').forEach(tr=>{
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+{% endblock %}

@@ -1,13 +1,58 @@
 {% extends "base.html" %}
-{% block title %}Home | Agenda{% endblock %}
+{% block title %}Início • Agenda{% endblock %}
+
+{% block hero %}
+<section class="hero py-5">
+  <div class="container py-4">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <h1 class="display-5 fw-bold mb-3">Organize seu tempo com estilo</h1>
+        <p class="lead mb-4">API com DRF, lembretes por e-mail com Celery e duas UIs: uma Web e outra leve com HTMX.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-light btn-lg" href="/web/events/"><i class="bi bi-layout-text-window-reverse me-1"></i> Abrir Web UI</a>
+          <a class="btn btn-outline-light btn-lg" href="/ui/events/"><i class="bi bi-lightning-charge me-1"></i> Abrir HTMX</a>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="card card-rounded shadow-soft p-4">
+          <div class="row g-3">
+            <div class="col-6"><div class="chip"><i class="bi bi-bell"></i> Lembretes</div></div>
+            <div class="col-6"><div class="chip"><i class="bi bi-shield-lock"></i> Auth Token</div></div>
+            <div class="col-6"><div class="chip"><i class="bi bi-calendar3"></i> Export ICS</div></div>
+            <div class="col-6"><div class="chip"><i class="bi bi-funnel"></i> Filtros</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
 {% block content %}
-  <p>Bem-vindo! Rotas úteis:</p>
-  <ul>
-    <li><a href="/admin/">/admin/</a> — admin do Django</li>
-    <li><a href="/health/">/health/</a> — health-check</li>
-    <li><a href="/api/">/api/</a> — API root (DRF)</li>
-    <li><code>POST /api/auth/token/</code> — obter token (com <code>username</code> e <code>password</code>)</li>
-    <li><code>GET /api/events/?date=YYYY-MM-DD</code> — eventos por dia</li>
-    <li><code>GET /api/events/{id}/export/ics/</code> — exportar ICS</li>
-  </ul>
+<div class="row g-4 mt-2">
+  <div class="col-md-4">
+    <div class="card card-rounded shadow-soft h-100">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-gear-wide-connected me-2"></i>Stack</h5>
+        <p class="text-secondary mb-0">Django, DRF, Celery/Redis, Bootstrap 5.3, HTMX 2.0.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-rounded shadow-soft h-100">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-rocket-takeoff me-2"></i>Pronto pra produção</h5>
+        <p class="text-secondary mb-0">Validações, autenticação e exportação de eventos em formato padrão.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-rounded shadow-soft h-100">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-palette me-2"></i>Dark mode</h5>
+        <p class="text-secondary mb-0">Tema claro/escuro com alternância e memória local.</p>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

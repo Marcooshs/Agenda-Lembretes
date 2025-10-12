@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Novo evento{% endblock %}
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card card-rounded shadow-soft">
+        <div class="card-header bg-transparent">
+          <h4 class="mb-0"><i class="bi bi-plus-square me-2"></i>Novo evento</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.title.id_for_label }}">Título</label>
+              {{ form.title }}
+              {{ form.title.errors }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.location.id_for_label }}">Local</label>
+              {{ form.location }}
+              {{ form.location.errors }}
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="{{ form.description.id_for_label }}">Descrição</label>
+              {{ form.description }}
+              {{ form.description.errors }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="{{ form.start.id_for_label }}">Início</label>
+              {{ form.start }}
+              {{ form.start.errors }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="{{ form.end.id_for_label }}">Fim</label>
+              {{ form.end }}
+              {{ form.end.errors }}
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <div class="form-check">
+                {{ form.is_all_day }}
+                <label class="form-check-label" for="id_is_all_day">Dia inteiro</label>
+              </div>
+            </div>
+            <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+              <a class="btn btn-outline-secondary" href="{% url 'scheduler_web:events' %}">Cancelar</a>
+              <button class="btn btn-gradient" type="submit"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
