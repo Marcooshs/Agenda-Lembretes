@@ -20,7 +20,7 @@ def health(_):
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Home (template opcional)
+    # Home
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 
     # Health-check com info do DB
@@ -32,10 +32,10 @@ urlpatterns = [
     # API REST
     path('api/', include('scheduler.urls')),
 
-    # UI Web (Bootstrap) - precisa do arquivo scheduler/urls_web.py
+    # UI Web (Bootstrap)
     path('web/', include(('scheduler.urls_web', 'scheduler_web'), namespace='scheduler_web')),
 
-    # UI HTMX (leve e moderna) - precisa do arquivo scheduler/urls_web.py
+    # UI HTMX (leve e moderna)
     path('ui/', include(('scheduler.urls_htmx', 'ui'), namespace='ui')),
 ]
 

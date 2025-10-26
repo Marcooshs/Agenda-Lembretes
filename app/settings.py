@@ -15,7 +15,6 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'] if DEBUG else [])
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -79,7 +78,7 @@ DATABASES = {
 # ---- Validação de Senhas ----
 ENFORCE_PASSWORD_VALIDATION = env.bool(
     "ENFORCE_PASSWORD_VALIDATION",
-    default=not DEBUG,   # Em produção: liga por padrão. Em dev: você decide via .env
+    default=not DEBUG,
 )
 
 AUTH_PASSWORD_VALIDATORS = [] if not ENFORCE_PASSWORD_VALIDATION else [
@@ -145,7 +144,7 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@agenda.local")
 # Celery / Redis
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=env("REDIS_URL", default="redis://localhost:6379/0"))
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/1")
-CELERY_TASK_ALWAYS_EAGER = False  # Em testes locais pode usar True
+CELERY_TASK_ALWAYS_EAGER = False
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TIME_LIMIT = 60
 CELERY_TASK_SOFT_TIME_LIMIT = 45
