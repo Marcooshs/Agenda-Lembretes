@@ -1,23 +1,41 @@
 ﻿#!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-role="$1"
+role="${1:-web}"
 
-echo 'Aguardando Postgres em db:5432...'
-until nc -z db 5432; do
-  sleep 1
-done
-echo 'Postgres disponível.'
+wait_for() {
+  local host="$1" port="$2"
+  echo "Aguardando ${host}:${port}..."
+  until nc -z -w 1 "$host" "$port"; do
+    sleep 1
+  done
+  echo "${host}:${port} disponível."
+}
+
+# Sempre espere o Postgres
+wait_for db 5432
+
+# Para worker/beat, também espere o Redis
+if [[ "$role" != "web" ]]; then
+  wait_for redis 6379
+fi
 
 python manage.py migrate --noinput
 
-if [ "$role" = 'web' ]; then
-  python manage.py collectstatic --noinput
-  python manage.py runserver 0.0.0.0:8000
-elif [ "$role" = 'worker' ]; then
-  celery -A app.celery worker -l info
-elif [ "$role" = 'beat' ]; then
-  celery -A app.celery beat -l info
-else
-  exec "$@"
-fi
+case "$role" in
+  web)
+    # Se você usa STATIC_ROOT, o collectstatic funciona.
+    # Caso não use, comente a linha abaixo.
+    python manage.py collectstatic --noinput
+    exec python manage.py runserver 0.0.0.0:8000
+    ;;
+  worker)
+    exec celery -A app.celery worker -l info
+    ;;
+  beat)
+    exec celery -A app.celery beat -l info
+    ;;
+  *)
+    exec "$@"
+    ;;
+esac
