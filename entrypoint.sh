@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 role="${1:-web}"
@@ -9,13 +9,13 @@ wait_for() {
   until nc -z -w 1 "$host" "$port"; do
     sleep 1
   done
-  echo "${host}:${port} disponível."
+  echo "${host}:${port} disponivel."
 }
 
 # Sempre espere o Postgres
 wait_for db 5432
 
-# Para worker/beat, também espere o Redis
+# Para worker/beat, tambem espere o Redis
 if [[ "$role" != "web" ]]; then
   wait_for redis 6379
 fi
@@ -24,8 +24,8 @@ python manage.py migrate --noinput
 
 case "$role" in
   web)
-    # Se você usa STATIC_ROOT, o collectstatic funciona.
-    # Caso não use, comente a linha abaixo.
+    # Se voce usa STATIC_ROOT, o collectstatic funciona.
+    # Caso nao use, pode comentar a linha abaixo.
     python manage.py collectstatic --noinput
     exec python manage.py runserver 0.0.0.0:8000
     ;;
