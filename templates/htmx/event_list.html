@@ -9,8 +9,12 @@
       <div class="text-secondary small">Crie e remova rapidamente com modais e transições.</div>
     </div>
     <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary" href="/web/events/"><i class="bi bi-layout-text-window-reverse me-1"></i> Web UI</a>
-      <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#quickAddModal"><i class="bi bi-plus-lg me-1"></i> Novo</button>
+      <a class="btn btn-outline-secondary" href="{% url 'scheduler_web:events' %}">
+        <i class="bi bi-layout-text-window-reverse me-1"></i> Web UI
+      </a>
+      <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+        <i class="bi bi-plus-lg me-1"></i> Novo
+      </button>
     </div>
   </div>
 

@@ -55,7 +55,7 @@
     <!-- Topbar -->
     <nav class="navbar navbar-expand-lg navbar-blur">
       <div class="container">
-        <a class="navbar-brand fw-semibold" href="/">
+        <a class="navbar-brand fw-semibold" href="{% url 'home' %}">
           <i class="bi bi-calendar2-week me-1"></i> Agenda
         </a>
         <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#topbar">
@@ -63,10 +63,18 @@
         </button>
         <div id="topbar" class="collapse navbar-collapse">
           <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/web/events/"><i class="bi bi-layout-text-window-reverse me-1"></i>Web</a></li>
-            <li class="nav-item"><a class="nav-link" href="/ui/events/"><i class="bi bi-lightning-charge me-1"></i>HTMX</a></li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'scheduler_web:events' %}">
+                <i class="bi bi-layout-text-window-reverse me-1"></i>Web
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'ui:events' %}">
+                <i class="bi bi-lightning-charge me-1"></i>HTMX
+              </a>
+            </li>
             <li class="nav-item"><a class="nav-link" href="/api/"><i class="bi bi-braces-asterisk me-1"></i>API</a></li>
-            <li class="nav-item"><a class="nav-link" href="/health/"><i class="bi bi-heart-pulse me-1"></i>Health</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'health' %}"><i class="bi bi-heart-pulse me-1"></i>Health</a></li>
           </ul>
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-sm btn-outline-secondary" id="themeToggle" title="Alternar tema">
@@ -74,9 +82,20 @@
             </button>
             {% if request.user.is_authenticated %}
               <span class="navbar-text small">Olá, <strong>{{ request.user.username }}</strong></span>
-              <a class="btn btn-sm btn-primary" href="/admin/logout/">Sair</a>
+
+              <!-- Logout via POST em /accounts/logout/ -->
+              <form action="{% url 'logout' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-primary">Sair</button>
+              </form>
             {% else %}
-              <a class="btn btn-sm btn-gradient" href="/admin/login/?next={{ request.path }}">Entrar</a>
+              <!-- Login da auth app com ?next= -->
+              <a class="btn btn-sm btn-gradient"
+                 href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">
+                 Entrar
+              </a>
+              <!-- link de cadastro (usa sua view signup) -->
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'signup' %}">Cadastrar</a>
             {% endif %}
           </div>
         </div>

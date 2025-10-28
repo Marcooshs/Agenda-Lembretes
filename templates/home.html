@@ -9,8 +9,12 @@
         <h1 class="display-5 fw-bold mb-3">Organize seu tempo com estilo</h1>
         <p class="lead mb-4">API com DRF, lembretes por e-mail com Celery e duas UIs: uma Web e outra leve com HTMX.</p>
         <div class="d-flex flex-wrap gap-2">
-          <a class="btn btn-light btn-lg" href="/web/events/"><i class="bi bi-layout-text-window-reverse me-1"></i> Abrir Web UI</a>
-          <a class="btn btn-outline-light btn-lg" href="/ui/events/"><i class="bi bi-lightning-charge me-1"></i> Abrir HTMX</a>
+          <a class="btn btn-light btn-lg" href="{% url 'scheduler_web:events' %}">
+            <i class="bi bi-layout-text-window-reverse me-1"></i> Abrir Web UI
+          </a>
+          <a class="btn btn-outline-light btn-lg" href="{% url 'ui:events' %}">
+            <i class="bi bi-lightning-charge me-1"></i> Abrir HTMX
+          </a>
         </div>
       </div>
       <div class="col-lg-6 text-center">

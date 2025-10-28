@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from django.db import connection
 from rest_framework.authtoken.views import obtain_auth_token
+from app.views_accounts import signup
 
 
 def health(_):
@@ -28,6 +29,10 @@ urlpatterns = [
 
     # Auth por token (DRF)
     path('api/auth/token/', obtain_auth_token, name='api-token'),
+
+    # Autenticação web (login/logout, rest de senha, etc)
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/signup/", signup, name="signup"),
 
     # API REST
     path('api/', include('scheduler.urls')),

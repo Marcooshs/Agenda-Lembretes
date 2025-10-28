@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Saiu da conta · App{% endblock %}
+{% block content %}
+<div class="alert alert-info">Você saiu da sua conta.</div>
+<a class="btn btn-primary" href="{% url 'login' %}">Entrar novamente</a>
+{% endblock %}

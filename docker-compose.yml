@@ -6,15 +6,18 @@ services:
       POSTGRES_USER: agenda_user
       POSTGRES_PASSWORD: agenda_pass
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U agenda_user -d agenda_db']
+      test: ["CMD-SHELL", "pg_isready -U agenda_user -d agenda_db -h localhost"]
       interval: 5s
       timeout: 3s
       retries: 20
+      start_period: 10s
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
 
   redis:
     image: redis:7
+    restart: unless-stopped
 
   web:
     build: .
@@ -26,9 +29,10 @@ services:
       redis:
         condition: service_started
     ports:
-      - '8000:8000'
+      - "8000:8000"
     volumes:
       - .:/app
+    restart: unless-stopped
 
   worker:
     build: .
@@ -41,6 +45,7 @@ services:
         condition: service_started
     volumes:
       - .:/app
+    restart: unless-stopped
 
   beat:
     build: .
@@ -53,6 +58,7 @@ services:
         condition: service_started
     volumes:
       - .:/app
+    restart: unless-stopped
 
 volumes:
   pgdata:
