@@ -29,7 +29,7 @@ services:
       redis:
         condition: service_started
     ports:
-      - "8001:8000"    # <— mudou aqui (host:container)
+      - "8001:8000"
     volumes:
       - .:/app
     restart: unless-stopped

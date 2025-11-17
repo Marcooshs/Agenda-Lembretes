@@ -6,5 +6,5 @@ class HealthTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(data.get('status'), 'ok')
-        self.assertIn('db', data)           # exibe info do banco
-        self.assertIn('engine', data)       # engine do Djang
+        self.assertIn('db', data)
+        self.assertIn('engine', data)
